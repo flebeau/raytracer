@@ -1,22 +1,16 @@
 #ifndef MATERIAL_HPP
 #define MATERIAL_HPP
 
-#include <vector>
+#include "vector.hpp"
 
 class Material {
 public:
-	Material() : color(3) {
-		color[0] = 1;
-		color[1] = 1;
-		color[2] = 1;
-	}
-	Material(double r, double g, double b) : color(3) {
-		color[0] = r;
-		color[1] = g;
-		color[2] = b;
-	}
+	Material() : color(1,1,1), specularity(0) {}
+	Material(double r, double g, double b, double s = 0, double sr = 1, double sg = 1, double sb = 1) : color(r,g,b), specularity(s), spec_color(sr,sg,sb) {}
 	
-	std::vector<double> color;	
+	Vector color;
+	Vector spec_color;
+	double specularity;
 };
 
 /* Materials */
@@ -25,8 +19,10 @@ namespace Materials {
 	const Material blue = Material(0,0,1);
 	const Material red = Material(1,0,0);
 	const Material green = Material(0,1,0);
-	const Material magenta = Material(1,1,0);
-	const Material white = Material(1,1,1);
+	const Material magenta = Material(1,0,1);
+	const Material yellow = Material(1,1,0);
+	const Material mirror = Material(0,0,0,1.);
+	const Material yellow_mirror = Material(1,1,0,0.5,1,1,0);
 }
 
 #endif

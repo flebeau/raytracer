@@ -5,6 +5,10 @@
 Vector Vector::operator*(const double &alpha) const {
 	return Vector(alpha*x, alpha*y, alpha*z);
 }
+
+Vector Vector::operator*(const Vector &v) const {
+	return Vector(x*v.x,y*v.y,z*v.z);
+}
 	
 Vector Vector::operator+(const Vector &v) const {
 	return Vector(x+v.x, y+v.y, z+v.z);
