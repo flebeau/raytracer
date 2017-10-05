@@ -17,11 +17,15 @@ public:
 
 class Scene {
 public:
-	typedef std::pair<double, Sphere> Intersection;
+	struct Intersection {
+		double t;
+		Sphere sphere;
+		bool entrance;
+	};
 	
 	Scene(Light l) : light(l) {}
 	
-	Scene::Intersection intersect(const Ray &ray) const;
+	Intersection intersect(const Ray &ray) const;
 	Vector getColor(const Ray &r, int n);
 	
 	std::vector<Sphere> spheres;

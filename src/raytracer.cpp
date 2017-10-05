@@ -19,17 +19,17 @@ int main(int argc, char *argv[]) {
 	
 	/* Constants of the scene */
 	Vector camera = Vector(0,0,55);
-	double fov = 60. * PI / 180.;
-	int n_bounces = 5;
+	double fov = 70. * PI / 180.;
+	int n_bounces = 10;
 	
-	Scene scene(Light(Vector(-10, 20, 40),1100));
-	scene.spheres.push_back(Sphere(Vector(0,0,0),10,Materials::mirror));
+	Scene scene(Light(Vector(-10, 20, 40),1800));
+	scene.spheres.push_back(Sphere(Vector(0,0,20),10,Materials::mirror_glass));
 	scene.spheres.push_back(Sphere(Vector(0,1000,0),940,Materials::red));
-	scene.spheres.push_back(Sphere(Vector(0,0,1000),940,Materials::yellow));
+	scene.spheres.push_back(Sphere(Vector(0,0,1000),940,Materials::mirror));
 	scene.spheres.push_back(Sphere(Vector(0,-1000,0),990,Materials::blue));
-	scene.spheres.push_back(Sphere(Vector(0,0,-1000),940,Materials::green));
-	scene.spheres.push_back(Sphere(Vector(1000,0,0),940));
-	scene.spheres.push_back(Sphere(Vector(-1000,0,0),940));
+	scene.spheres.push_back(Sphere(Vector(0,0,-1000),940,Materials::mirror));
+	scene.spheres.push_back(Sphere(Vector(1000,0,0),940, Materials::magenta));
+	scene.spheres.push_back(Sphere(Vector(-1000,0,0),940, Materials::cyan));
    	
 	/* Rendering for all pixel */
 	for (int i = 0; i<height; i++) {

@@ -1,6 +1,6 @@
 CC=g++
 LDFLAGS=-L/usr/X11R6/lib -lm -lpthread -lX11
-CFLAGS=-std=c++11 -O3
+CFLAGS=-std=c++11
 DEPS = vector.hpp ray.hpp sphere.hpp scene.hpp utils.hpp CImg.h material.hpp
 OBJ = vector.o sphere.o scene.o
 

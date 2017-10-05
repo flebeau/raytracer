@@ -4,15 +4,20 @@
 #include "vector.hpp"
 #include "ray.hpp"
 #include "material.hpp"
+#include <utility>
 
 class Sphere {
 public:
 	/* Constructors */
+	Sphere() : origin(), radius(0) {}
 	Sphere(Vector o, double r) : origin(o), radius(r) {}
 	Sphere(Vector o, double r, Material m) : origin(o), radius(r), material(m) {}
 	
-	// Returns 0 if no intersection and t such that C + t.V is the intersection otherwise
-	double intersect(const Ray &ray) const;
+	typedef std::pair<double, bool> Intersection;
+	
+	// Returns 0 if no intersection and t such that C + t.V is the intersection otherwise.
+	// If t > 0 then returns also true if the ray is entering the sphere
+	Intersection intersect(const Ray &ray) const;
 	
 	Vector origin;
 	double radius;
