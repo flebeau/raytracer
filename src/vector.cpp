@@ -38,3 +38,7 @@ Vector Vector::normalize() const {
 	double n = norm();
 	return Vector(x/n, y/n, z/n);
 }
+
+Vector operator*(double alpha, const Vector &v) {
+	return Vector(alpha*v.x, alpha*v.y, alpha*v.z);
+}

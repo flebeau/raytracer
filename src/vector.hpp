@@ -23,4 +23,6 @@ public:
 	double x,y,z;
 };
 
+Vector operator*(double alpha, const Vector &v);
+
 #endif

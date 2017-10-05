@@ -1,18 +1,22 @@
 CC=g++
 LDFLAGS=-L/usr/X11R6/lib -lm -lpthread -lX11
-DEPS = vector.hpp ray.hpp sphere.hpp utils.hpp CImg.h
-OBJ = vector.o sphere.o
+CFLAGS=-std=c++11
+DEPS = vector.hpp ray.hpp sphere.hpp scene.hpp utils.hpp CImg.h
+OBJ = vector.o sphere.o scene.o
 
 all: raytracer
 
 vector.o: vector.cpp $(DEPS)
-	$(CC) -c -o $@ $<
+	$(CC) -c -o $@ $< $(CFLAGS)
 
 sphere.o: sphere.cpp $(DEPS)
-	$(CC) -c -o $@ $<
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+scene.o: scene.cpp $(DEPS)
+	$(CC) -c -o $@ $< $(CFLAGS)
 
 raytracer: raytracer.cpp $(OBJ) $(DEPS)
-	$(CC) -o $@ raytracer.cpp $(OBJ) $(LDFLAGS)
+	$(CC) -o $@ raytracer.cpp $(OBJ) $(CFLAGS) $(LDFLAGS)
 
 clean:
 	rm -rf *.o
