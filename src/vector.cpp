@@ -1,5 +1,10 @@
 #include "vector.hpp"
+#include "utils.hpp"
 #include <math.h>
+#include <random>
+
+std::default_random_engine engine;
+std::uniform_real_distribution<double> unif(0.,1.);
 
 /* Operations */
 Vector Vector::operator*(const double &alpha) const {
@@ -43,6 +48,20 @@ Vector Vector::normalize() const {
 	return Vector(x/n, y/n, z/n);
 }
 
+void Vector::convertCoordinateSystem(Vector origin, Vector u, Vector v, Vector w) {
+	x = origin.x + x*u.x + y*v.x + z*w.x;
+	y = origin.y + x*u.y + y*v.y + z*w.y;
+	z = origin.z + x*u.z + y*v.z + z*w.z;
+}
+
 Vector operator*(double alpha, const Vector &v) {
 	return Vector(alpha*v.x, alpha*v.y, alpha*v.z);
+}
+
+Vector generateUniformRandomVector() {
+	double r1 = unif(engine);
+	double r2 = unif(engine);
+	double t = sqrt(1-r2);
+	
+	return Vector(cos(2*PI*r1)*t, sin(2*PI*r1)*t, sqrt(r2));
 }

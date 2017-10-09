@@ -1,3 +1,4 @@
+#include "utils.hpp"
 #include "scene.hpp"
 #include <algorithm>
 #include <math.h>
@@ -106,12 +107,25 @@ Vector Scene::getColor(const Ray &ray, int n) const {
 		
 		// Treat the diffuse part
 		if (inter.entrance && sphere.material.specularity + sphere.material.refraction < 1) {
-			// Check if there is an obstacle on the path to the light
+		    /* First compute direct lightning */ 
+			// If there is an obstacle on the path to the light
 			Scene::Intersection obstacle = intersect(Ray(P1,(light.position-P1).normalize()));
 			if (obstacle.t <= 0 || obstacle.t > (light.position-P1).norm()) {
 				double c = std::max(0., (light.position-P).normalize().sp(nor) * light.intensity / ((light.position-P).snorm()));
 				
 				res = res + c * (1 - sphere.material.specularity -sphere.material.refraction) * sphere.material.color;
+			}
+			
+			/* Now compute indirect lightning */
+			if (n > 0) {
+				Ray r;
+				r.origin = P1;
+				r.direction = generateUniformRandomVector(); // Get random direction
+				Vector v = nor + Vector(1,1,1);
+				v = v - nor.sp(v) * nor;
+				Vector w = nor.vp(v);
+				r.direction.convertCoordinateSystem(P, nor, v, w); // Convert to canonical coordinates
+				res = res + (1./ PI) * sphere.material.diffusion_coeff * sphere.material.color * getColor(r, n-1);
 			}
 		}
 	}
