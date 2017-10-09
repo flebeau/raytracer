@@ -1,6 +1,10 @@
 #include <math.h>
 #include "sphere.hpp"
 
+bool Sphere::compareByRadius(const Sphere &s1, const Sphere &s2) {
+	return (s1.radius >= s2.radius);
+}
+
 Sphere::Intersection Sphere::intersect(const Ray &ray) const {
 	double b = 2. * ray.direction.sp(ray.origin - origin);
 	double c = (ray.origin - origin).snorm() - radius * radius;

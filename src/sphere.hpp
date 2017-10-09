@@ -15,6 +15,8 @@ public:
 	
 	typedef std::pair<double, bool> Intersection;
 	
+	static bool compareByRadius(const Sphere &s1, const Sphere &s2);
+	
 	// Returns 0 if no intersection and t such that C + t.V is the intersection otherwise.
 	// If t > 0 then returns also true if the ray is entering the sphere
 	Intersection intersect(const Ray &ray) const;

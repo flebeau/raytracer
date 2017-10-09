@@ -19,16 +19,19 @@ class Scene {
 public:
 	struct Intersection {
 		double t;
-		Sphere sphere;
+		int sphere;
 		bool entrance;
 	};
 	
 	Scene(Light l) : light(l) {}
 	
+	bool precomputeSphereInclusion();
+	
 	Intersection intersect(const Ray &ray) const;
-	Vector getColor(const Ray &r, int n);
+	Vector getColor(const Ray &r, int n) const;
 	
 	std::vector<Sphere> spheres;
+	std::vector<int> sphere_inclusion;
     Light light;
 };
 
