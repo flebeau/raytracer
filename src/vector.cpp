@@ -48,10 +48,10 @@ Vector Vector::normalize() const {
 	return Vector(x/n, y/n, z/n);
 }
 
-void Vector::convertCoordinateSystem(Vector origin, Vector u, Vector v, Vector w) {
-	x = origin.x + x*u.x + y*v.x + z*w.x;
-	y = origin.y + x*u.y + y*v.y + z*w.y;
-	z = origin.z + x*u.z + y*v.z + z*w.z;
+void Vector::convertCoordinateSystem(Vector u, Vector v, Vector w) {
+	x = x*u.x + y*v.x + z*w.x;
+	y = x*u.y + y*v.y + z*w.y;
+	z = x*u.z + y*v.z + z*w.z;
 }
 
 Vector operator*(double alpha, const Vector &v) {
@@ -62,6 +62,7 @@ Vector generateUniformRandomVector() {
 	double r1 = unif(engine);
 	double r2 = unif(engine);
 	double t = sqrt(1-r2);
+	//std::cerr << cos(2*PI*r1)*t << "," << sin(2*PI*r1)*t << "\n";
 	
 	return Vector(cos(2*PI*r1)*t, sin(2*PI*r1)*t, sqrt(r2));
 }

@@ -51,7 +51,7 @@ Scene::Intersection Scene::intersect(const Ray &ray) const {
 }
 
 Vector Scene::getColor(const Ray &ray, int n) const {
-	Vector res;
+	Vector res(0,0,0);
 	double eps = 0.001; // Use to avoid noise
 	Scene::Intersection inter = intersect(ray);
 	double &t = inter.t;
@@ -121,11 +121,11 @@ Vector Scene::getColor(const Ray &ray, int n) const {
 				Ray r;
 				r.origin = P1;
 				r.direction = generateUniformRandomVector(); // Get random direction
-				Vector v = nor + Vector(1,1,1);
-				v = v - nor.sp(v) * nor;
+				Vector v = Vector(-nor.y, nor.x, 0).normalize();
 				Vector w = nor.vp(v);
-				r.direction.convertCoordinateSystem(P, nor, v, w); // Convert to canonical coordinates
-				res = res + (1./ PI) * sphere.material.diffusion_coeff * sphere.material.color * getColor(r, n-1);
+				r.direction.convertCoordinateSystem(v, w, nor); // Convert to canonical coordinates
+				r.direction = r.direction.normalize();
+				res = res + (1./PI) * sphere.material.diffusion_coeff * sphere.material.color * getColor(r, n-1);
 			}
 		}
 	}

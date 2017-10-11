@@ -22,7 +22,7 @@ public:
 	
 	// Convert the current vector written in a coordinate system expressed in the
 	// canonical system to the canonical system
-	void convertCoordinateSystem(Vector origin, Vector u, Vector v, Vector w);
+	void convertCoordinateSystem(Vector u, Vector v, Vector w);
 	
 	/* Coordinates */
 	double x,y,z;

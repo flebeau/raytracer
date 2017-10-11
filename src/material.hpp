@@ -5,7 +5,7 @@
 
 class Material {
 public:
-	Material(double r = 1, double g = 1, double b = 1, double d = 0.2
+	Material(double r = 1, double g = 1, double b = 1, double d = 1.
 			 , double s = 0, double sr = 1, double sg = 1, double sb = 1
 			 , double re = 0, double rer = 1, double reg = 1, double reb = 1
 			 , double ind = 1) 
