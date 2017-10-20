@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
 	int n_retry = 100;
 	
 	Scene scene(Light(Vector(-10, 20, 40),1000));
-	scene.spheres.push_back(Sphere(Vector(0,0,20),10));
+	scene.spheres.push_back(Sphere(Vector(0,0,20),10, Materials::glass));
 	//scene.spheres.push_back(Sphere(Vector(0,0,20),9.5, Materials::transparent));
 	// scene.spheres.push_back(Sphere(Vector(0,3,13),2,Materials::glass));
 	// scene.spheres.push_back(Sphere(Vector(0,1,17),2,Materials::glass));

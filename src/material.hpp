@@ -9,16 +9,17 @@ public:
 			 , double s = 0, double sr = 1, double sg = 1, double sb = 1
 			 , double re = 0, double rer = 1, double reg = 1, double reb = 1
 			 , double ind = 1) 
-		: color(r,g,b), specularity(s), spec_color(sr,sg,sb)
-		, refraction(re), refr_color(rer, reg, reb), refr_index(ind), diffusion_coeff(d) {}
+		: color(r,g,b), diffusion_coeff(d), specularity(s), spec_color(sr,sg,sb)
+		, refraction(re), refr_color(rer, reg, reb), refr_index(ind) {}
 	
 	Vector color;
-	Vector spec_color;
-	double specularity;
-	Vector refr_color;
-	double refraction; // specularity+refraction should be <= 1
-	double refr_index;
 	double diffusion_coeff;
+	double specularity;
+	Vector spec_color;
+	double refraction; // specularity+refraction should be <= 1
+	Vector refr_color;
+	double refr_index;
+	
 };
 
 /* Materials */

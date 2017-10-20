@@ -9,7 +9,7 @@ bool Scene::precomputeSphereInclusion() {
 	std::sort(spheres.begin(), spheres.end(), Sphere::compareByRadius);
 	sphere_inclusion = std::vector<int>(spheres.size(),0);
 	
-	for (int i = 1; i<spheres.size(); i++) {
+	for (int i = 1; i< (long) spheres.size(); i++) {
 	    sphere_inclusion[i] = i;
 		if (spheres[i].material.refraction > 0) {
 			for (int j = i-1; j >= 0; j--) {
@@ -32,7 +32,7 @@ Scene::Intersection Scene::intersect(const Ray &ray) const {
 	double t = 0;
 	int s = 0;
 	bool entrance = false;
-	for (int i = 0; i<spheres.size(); i++) {
+	for (int i = 0; i< (long) spheres.size(); i++) {
 		Sphere::Intersection inter = spheres[i].intersect(ray);
 		// Take minimum of positive t's
 		if (inter.first > 0 && (t == 0 || inter.first < t)) {
