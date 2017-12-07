@@ -5,6 +5,7 @@
 #include "ray.hpp"
 #include "vector.hpp"
 #include <vector>
+#include <memory>
 #include <utility>
 
 class Light {
@@ -25,12 +26,14 @@ public:
 	
 	Scene(Light l) : light(l) {}
 	
+	void addSphere(Sphere *s) {spheres.push_back(std::unique_ptr<Sphere>(s));}
+	
 	bool precomputeSphereInclusion();
 	
 	Intersection intersect(const Ray &ray) const;
-	Vector getColor(const Ray &r, int n) const;
+	Vector getColor(const Ray &r, int n, bool fresnel = true) const;
 	
-	std::vector<Sphere> spheres;
+	std::vector<std::unique_ptr<Sphere> > spheres;
 	std::vector<int> sphere_inclusion;
     Light light;
 };

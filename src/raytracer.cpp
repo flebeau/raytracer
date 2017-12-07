@@ -23,22 +23,23 @@ int main(int argc, char *argv[]) {
 	double fov = 60. * PI / 180.;
 	int n_bounces = 6;
 	double gamma = 2.2; // Gamma correction coefficient
-	int n_retry = 100;
+	int n_retry = 50;
 	
-	Scene scene(Light(Vector(-10, 20, 40),1000));
-	scene.spheres.push_back(Sphere(Vector(0,0,20),10, Materials::glass));
-	//scene.spheres.push_back(Sphere(Vector(0,0,20),9.5, Materials::transparent));
+	Scene scene(Light(Vector(-10, 20, 40),3000));
+	//scene.addSphere(new Sphere(Vector(0,0,20),10, Materials::glass));
+	scene.addSphere(new MultiColorSphere(Vector(0,0,20),10));
+    //scene.spheres.push_back(Sphere(Vector(0,0,20),6, Materials::light_glass));
 	// scene.spheres.push_back(Sphere(Vector(0,3,13),2,Materials::glass));
-	// scene.spheres.push_back(Sphere(Vector(0,1,17),2,Materials::glass));
-	// scene.spheres.push_back(Sphere(Vector(0,-1,13),2,Materials::glass));
-	// scene.spheres.push_back(Sphere(Vector(0,-3,17),2,Materials::glass));
+	// scene.addSphere(Sphere(Vector(0,1,17),2,Materials::glass));
+	// scene.addSphere(Sphere(Vector(0,-1,13),2,Materials::glass));
+	// scene.addSphere(Sphere(Vector(0,-3,17),2,Materials::glass));
 	
-	scene.spheres.push_back(Sphere(Vector(0,1000,0),940,Materials::red));
-	scene.spheres.push_back(Sphere(Vector(0,0,1000),940));
-	scene.spheres.push_back(Sphere(Vector(0,-1000,0),990,Materials::blue));
-	scene.spheres.push_back(Sphere(Vector(0,0,-1000),940,Materials::green));
-	scene.spheres.push_back(Sphere(Vector(1000,0,0),940, Materials::magenta));
-	scene.spheres.push_back(Sphere(Vector(-1000,0,0),940, Materials::cyan));
+	scene.addSphere(new Sphere(Vector(0,1000,0),940,Materials::red));
+	scene.addSphere(new Sphere(Vector(0,0,1000),940));
+	scene.addSphere(new Sphere(Vector(0,-1000,0),990,Materials::blue));
+	scene.addSphere(new Sphere(Vector(0,0,-1000),940,Materials::green));
+	scene.addSphere(new Sphere(Vector(1000,0,0),940, Materials::magenta));
+	scene.addSphere(new Sphere(Vector(-1000,0,0),940, Materials::cyan));
 
 	if (!scene.precomputeSphereInclusion()) {
 		ErrorMessage() << "invalid scene! At least two spheres intersect without one being strictly included into the other.";

@@ -35,7 +35,7 @@ namespace Materials {
 	const Material yellow_mirror = Material(1,1,0,0.,0.5,1,1,0);
 	const Material transparent = Material(1,1,1,0.,0.,1,1,1,1.,1,1,1,1.);
 	const Material glass = Material(1,1,1,0.,0.,1,1,1,1.,1,1,1,1.5);
-	const Material light_glass = Material(1,1,1,0.,0.,1,1,1,1.,1,1,1,1.4);
+	const Material light_glass = Material(1,1,1,0.,0.,1,1,1,1.,1,1,1,1.2);
 	const Material artistic = Material(0,1,1,0.,0.3,0,0,1,0.7,1,1,0,1.5);
 	const Material mirror_glass = Material(1,1,1,0.,0.5,1,1,1,0.5,1,1,1,1.5);
 }

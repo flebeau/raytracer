@@ -1,8 +1,8 @@
 #include <math.h>
 #include "sphere.hpp"
 
-bool Sphere::compareByRadius(const Sphere &s1, const Sphere &s2) {
-	return (s1.radius >= s2.radius);
+bool Sphere::compareByRadius(const std::unique_ptr<Sphere> &s1, const std::unique_ptr<Sphere> &s2) {
+	return (s1->radius >= s2->radius);
 }
 
 Sphere::Intersection Sphere::intersect(const Ray &ray) const {
@@ -22,4 +22,14 @@ Sphere::Intersection Sphere::intersect(const Ray &ray) const {
 		return Sphere::Intersection(t2, false);
 	
 	return Sphere::Intersection(0, false);
+}
+
+Vector Sphere::color(Vector P) const {
+	return material.color;
+}
+
+Vector MultiColorSphere::color(Vector P) const {
+	return Vector(abs(origin.x-P.x) / (radius)
+				 ,abs(origin.y-P.y) / (radius)
+				 ,abs(origin.z-P.z) / (radius));
 }
