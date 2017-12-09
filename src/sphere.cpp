@@ -29,7 +29,16 @@ Vector Sphere::color(Vector P) const {
 }
 
 Vector MultiColorSphere::color(Vector P) const {
-	return Vector(abs(origin.x-P.x) / (radius)
-				 ,abs(origin.y-P.y) / (radius)
-				 ,abs(origin.z-P.z) / (radius));
+	//return Vector(abs(radius - P.x) / radius
+	//			  ,abs(radius - P.y) / radius
+	//			  ,abs(radius - P.z) / radius
+	//			 );
+	double r=0,g=0,b=0;
+	if (origin.x - P.x > 0.)
+		r = 1;
+	if (origin.y - P.y > 0.)
+		g = 1;
+	if (origin.z - P.z > 0.)
+		b = 1;
+	return Vector(r,g,b);
 }
