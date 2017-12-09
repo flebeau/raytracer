@@ -24,14 +24,18 @@ public:
 		bool entrance;
 	};
 	
+	Scene() : light(Vector(0,0,0),0) {}
 	Scene(Light l) : light(l) {}
 	
+	void setLight(Light l) {light = l;}
 	void addSphere(Sphere *s) {spheres.push_back(std::unique_ptr<Sphere>(s));}
 	
 	bool precomputeSphereInclusion();
 	
 	Intersection intersect(const Ray &ray) const;
 	Vector getColor(const Ray &r, int n, bool fresnel = true) const;
+	
+private:
 	
 	std::vector<std::unique_ptr<Sphere> > spheres;
 	std::vector<int> sphere_inclusion;

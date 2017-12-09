@@ -1,6 +1,8 @@
 #ifndef MATERIAL_HPP
 #define MATERIAL_HPP
 
+#include <string>
+#include <map>
 #include "vector.hpp"
 
 class Material {
@@ -19,12 +21,12 @@ public:
 	double refraction; // specularity+refraction should be <= 1
 	Vector refr_color;
 	double refr_index;
-	
 };
 
 /* Materials */
 
 namespace Materials {
+	const Material neutral = Material();
 	const Material blue = Material(0,0,1);
 	const Material red = Material(1,0,0);
 	const Material green = Material(0,1,0);
@@ -34,10 +36,27 @@ namespace Materials {
 	const Material mirror = Material(0,0,0,0.,1.);
 	const Material yellow_mirror = Material(1,1,0,0.,0.5,1,1,0);
 	const Material transparent = Material(1,1,1,0.,0.,1,1,1,1.,1,1,1,1.);
+	const Material impossible = Material(1,1,1,0.,0.,1,1,1,1.,1,1,1,0.7);
 	const Material glass = Material(1,1,1,0.,0.,1,1,1,1.,1,1,1,1.5);
 	const Material light_glass = Material(1,1,1,0.,0.,1,1,1,1.,1,1,1,1.2);
 	const Material artistic = Material(0,1,1,0.,0.3,0,0,1,0.7,1,1,0,1.5);
 	const Material mirror_glass = Material(1,1,1,0.,0.5,1,1,1,0.5,1,1,1,1.5);
+	
+	const std::map<std::string, const Material &> by_name = {
+		{"neutral", neutral},
+		{"blue", blue},
+		{"red", red},
+		{"green", green},
+		{"magenta", magenta},
+		{"yellow", yellow},
+		{"cyan", cyan},
+		{"mirror", mirror},
+		{"yellow_mirror", yellow_mirror},
+		{"transparent", transparent},
+		{"glass", glass},
+		{"impossible", impossible},
+		{"light_glass", light_glass}
+	};
 }
 
 #endif

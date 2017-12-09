@@ -67,7 +67,7 @@ Vector Scene::getColor(const Ray &ray, int n, bool fresnel) const {
 		double refraction = sphere.material.refraction;
 		
 		// Compute Fresnel coefficients
-		if (fresnel && (sphere_inclusion[inter.sphere] == inter.sphere || sphere.material.refr_index != spheres[sphere_inclusion[inter.sphere]]->material.refr_index) && (sphere.material.specularity > 0. || sphere.material.refraction > 0.)) {
+		if (fresnel && (sphere_inclusion[inter.sphere] == inter.sphere || sphere.material.refr_index != spheres[sphere_inclusion[inter.sphere]]->material.refr_index) && sphere.material.refraction > 0. && sphere.material.specularity < 0.) {
 			double n_inc, n_out;
 			Vector nor_refl = nor;
 			if (inter.entrance) {
@@ -84,14 +84,6 @@ Vector Scene::getColor(const Ray &ray, int n, bool fresnel) const {
 				nor_refl = - nor_refl;
 			}
 			double k0 = (n_inc-n_out)*(n_inc-n_out)/((n_inc+n_out)*(n_inc+n_out));
-			//Vector i;
-			// if (n_inc < n_out) {
-			// 	i = (inc - 2 * inc.sp(nor_refl) * nor_refl).normalize();
-			// }
-			// else {
-			// 	double norm_coeff = 1 - pow(n_inc/n_out,2) * (1 - pow(inc.sp(nor_refl),2));
-			// 	i = ((n_inc / n_out) * inc - ((n_inc / n_out) * inc.sp(nor_refl) + sqrt(norm_coeff)) * nor_refl).normalize();
-			// }b
 			double l = nor_refl.sp(inc);
 			if (l < 0.)
 				l = -l;
@@ -99,6 +91,18 @@ Vector Scene::getColor(const Ray &ray, int n, bool fresnel) const {
 			specularity = 1. - refraction;
 		}
 		
+		// If need to bounce and to do refraction, choose one randomly
+		if (refraction > 0 && specularity > 0) {
+			if (getUniformNumber() < refraction) {
+				specularity = 0.;
+				refraction = 1.;
+			}
+			else {
+				specularity = 1.;
+				refraction = 0.;
+			}
+		}
+			
 		if (inter.entrance && specularity > 0 && n>0) { // If specular, bounce if possible
 			Ray r;
 			r.origin = P1;
@@ -137,6 +141,12 @@ Vector Scene::getColor(const Ray &ray, int n, bool fresnel) const {
 					res = res + refraction * color * sphere.material.refr_color;
 				else
 					res = res + color;
+			}
+			else {
+				r.origin = P1;
+				r.direction = (inc - 2 * inc.sp(nor) * nor).normalize();
+				res = getColor(r, n-1, fresnel);
+				res = refraction * res * sphere.material.refr_color;
 			}
 		}
 		

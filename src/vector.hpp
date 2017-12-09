@@ -31,5 +31,6 @@ public:
 Vector operator*(double alpha, const Vector &v);
 
 Vector generateUniformRandomVector();
+double getUniformNumber();
 
 #endif

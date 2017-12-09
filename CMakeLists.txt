@@ -10,11 +10,11 @@ include_directories(src)
 file(GLOB SOURCES src/*.cpp)
 
 # Packages
-find_package(Boost COMPONENTS timer)
+find_package(Boost COMPONENTS timer program_options)
 find_package(Threads REQUIRED)
 find_package(X11 REQUIRED)
 find_package(OpenMP REQUIRED)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 
 add_executable(raytracer ${SOURCES})
-target_link_libraries(raytracer m ${X11_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(raytracer m ${X11_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})

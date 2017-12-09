@@ -66,3 +66,7 @@ Vector generateUniformRandomVector() {
 	
 	return Vector(cos(2*PI*r1)*t, sin(2*PI*r1)*t, sqrt(r2));
 }
+
+double getUniformNumber() {
+	return unif(engine);
+}
