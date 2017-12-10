@@ -13,6 +13,9 @@ public:
 	Vector operator+(const Vector &v) const;	
 	Vector operator-(const Vector &v) const;	
 	Vector operator-() const;
+	bool operator==(const Vector &v) const {
+		return (v.x == x && v.y == y && v.z == z);
+	}
 
 	double sp(const Vector &v) const; // Scalar product
 	Vector vp(const Vector &v) const; // Vector product

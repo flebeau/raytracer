@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <math.h>
 #include <iostream>
+#include <sstream>
 
 bool Scene::precomputeSphereInclusion() {
 	// First sort spheres by radius
@@ -20,12 +21,69 @@ bool Scene::precomputeSphereInclusion() {
 					sphere_inclusion[i] = j;
 					break;
 				}
-				if (dist < spheres[j]->radius + spheres[i]->radius)
+				if (dist < spheres[j]->radius + spheres[i]->radius) {
+					std::cerr << dist << ":"
+							  << spheres[i]->origin.x << ","
+							  << spheres[i]->origin.y << ","
+							  << spheres[i]->origin.z << "/"
+							  << spheres[i]->radius << ";"
+							  << spheres[j]->origin.x << ","
+							  << spheres[j]->origin.y << ","
+							  << spheres[j]->origin.z << "/"
+							  << spheres[j]->radius << "\n";
 					return false;
+				}
 			}
 		}
 	}
 	return true;
+}
+
+double Scene::MaxRadiusNewSphere(const Vector &origin) const {
+	double r_max = std::numeric_limits<double>::max();
+	for (int i = 0; i<(long) spheres.size(); i++) {
+		// Check if the point is in the sphere
+		double dist = (spheres[i]->origin - origin).norm();
+		if (dist < spheres[i]->radius) {
+			// If the point is in a non-transparent sphere, returns -1
+			if (spheres[i]->material.refraction > 0)
+				return -1;
+			// If the sphere is transparent, take the radius into account
+			r_max = std::min(r_max, spheres[i]->radius - dist);
+		}
+		else
+			r_max = std::min(r_max, dist - spheres[i]->radius);
+	}
+	return r_max;
+}
+
+std::string Scene::toString(const Vector &camera, std::string name) const {
+	std::stringstream s;
+	if (name != "")
+		s << "# " << name << "\n";
+	s << "C " << camera.x << " " << camera.y << " " << camera.z << "\n";
+	s << "L " << light.position.x << " " << light.position.y << " " << light.position.z << " "
+	  << light.intensity << "\n";
+	for (int i = 0; i < (long) spheres.size(); i++) {
+		s << "S " << spheres[i]->origin.x << " "
+			  << spheres[i]->origin.y << " "
+			  << spheres[i]->origin.z << " "
+			  << spheres[i]->radius << " ";
+		bool found = false;
+		for (const auto &M : Materials::by_name) {
+			if (M.second == spheres[i]->material) {
+				s << M.first << "\n";
+				found = true;
+				break;
+			}
+		}
+		if (!found)
+			s << "object " 
+			  << spheres[i]->material.color.x << " "
+			  << spheres[i]->material.color.y << " "
+			  << spheres[i]->material.color.z << "\n";
+	}
+	return s.str();
 }
 
 Scene::Intersection Scene::intersect(const Ray &ray) const {
@@ -178,70 +236,3 @@ Vector Scene::getColor(const Ray &ray, int n, bool fresnel) const {
 	
 	return res;
 }
-
-/*
-Vector Scene::getColor(const Ray &ray, int n) {
-	Vector res;
-	double eps = 0.001; // Use to avoid noise
-	Scene::Intersection inter = intersect(ray);
-	double &t = inter.t;
-	Sphere &sphere = inter.sphere;
-	
-	if (t > 0) { // If it intersects, compute the color of the pixel
-		Vector P = ray.origin + t * ray.direction;
-		Vector inc = (P - ray.origin).normalize();
-		Vector nor = (P - sphere.origin).normalize();
-		Vector P1 = P + eps * nor;		
-		
-		if (sphere.material.specularity > 0 && n>0) { // If specular, bounce if possible
-			Ray r;
-			r.origin = P1;
-			r.direction = (inc - 2 * inc.sp(nor) * nor).normalize();
-			res = getColor(r, n-1);
-			res = sphere.material.specularity * res * sphere.material.spec_color;
-		}
-		
-		if (sphere.material.refraction > 0 && n>0) { // If refraction, compute the refracted ray
-			// First simulate entrance of the sphere
-			Ray r;
-			r.origin = P - eps * nor;
-			double n_inc, n_out;
-	    
-			n_inc = 1;
-			n_out = sphere.material.refr_index;
-
-			double norm_coeff = 1 - pow(n_inc/n_out,2) * (1 - pow(inc.sp(nor),2));
-			if (norm_coeff >= 0) {  // only reflexion in fact if it is negative
-				r.direction = ((n_inc / n_out) * inc - ((n_inc / n_out) * inc.sp(nor) + sqrt(norm_coeff)) * nor).normalize();
-				// Then compute exit ray out of the sphere
-				Sphere::Intersection inter_out = sphere.intersect(r);
-				Vector P_out = r.origin + inter_out.first * r.direction;
-				Vector inc_out = (P_out - r.origin).normalize();
-				Vector nor_out = (sphere.origin - P_out).normalize();
-				
-				norm_coeff = 1 - pow(n_out/n_inc,2) * (1 - pow(inc_out.sp(nor_out),2));
-				if (norm_coeff >= 0) {
-					r.origin = P_out - eps * nor_out;
-					r.direction = ((n_out / n_inc) * inc_out - ((n_out / n_inc) * inc_out.sp(nor_out) + sqrt(norm_coeff)) * nor_out).normalize();
-					Vector color = getColor(r, n-1);
-					res = res + sphere.material.refraction * color * sphere.material.refr_color;
-				}
-			}
-		}
-		
-		
-		// Treat the diffuse part
-		if (sphere.material.specularity + sphere.material.refraction < 1) {
-			// Check if there is an obstacle on the path to the light
-			Scene::Intersection obstacle = intersect(Ray(P1,(light.position-P1).normalize()));
-			if (obstacle.t <= 0 || obstacle.t > (light.position-P1).norm()) {
-				double c = std::max(0., (light.position-P).normalize().sp(nor) * light.intensity / ((light.position-P).snorm()));
-				
-				res = res + c * (1 - sphere.material.specularity -sphere.material.refraction) * sphere.material.color;
-			}
-		}
-	}
-	
-	return res;
-}
-*/

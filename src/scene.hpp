@@ -31,6 +31,12 @@ public:
 	void addSphere(Sphere *s) {spheres.push_back(std::unique_ptr<Sphere>(s));}
 	
 	bool precomputeSphereInclusion();
+	// Returns the maximum radius of a sphere with the given origin such that
+	// the sphere would be included in existing spheres, and returns -1 if the origin
+	// is in a non-transparent sphere
+	double MaxRadiusNewSphere(const Vector &origin) const;
+	
+	std::string toString(const Vector &camera, std::string name = "") const; // Export scene to string according to the specification format
 	
 	Intersection intersect(const Ray &ray) const;
 	Vector getColor(const Ray &r, int n, bool fresnel = true) const;
