@@ -38,7 +38,9 @@ int main(int argc, char *argv[]) {
 	double transparent_prob = 0.6;
 	double object_prob = 0.3;
 	unsigned n_spheres = 15;
-	
+	double intensity = 1000;
+
+	// Handle options
 	try {
 		po::options_description opt_raytracer("Options for the Raytracer program");
 		opt_raytracer.add_options()
@@ -55,6 +57,16 @@ int main(int argc, char *argv[]) {
 		po::options_description opt_random_scene("Options for random scene generation");
 		opt_random_scene.add_options()
 			("output_file,o", po::value<std::string>(&output_file), "Output scene file")
+			("size-x,x", po::value<double>(&size_x), "Size of the domain in x coordinate (default: 80)")
+			("size-y,y", po::value<double>(&size_y), "Size of the domain in y coordinate (default: 80)")
+			("size-z,z", po::value<double>(&size_z), "Size of the domain in z coordinate (default: 80)")
+			("radius-min", po::value<double>(&radius_min), "Minimum radius of generated spheres (default: 5)")
+			("radius-max", po::value<double>(&radius_max), "Maximum radius of generated spheres (default: 15)")
+			("mirror,m", po::value<double>(&mirror_prob), "Proportion of mirror spheres (default: 0.3)")
+			("transparent,t", po::value<double>(&transparent_prob), "Proportion of transparent spheres (default: 0.6)")
+			("object,b", po::value<double>(&object_prob), "Proportion of object spheres (default: 0.3)")
+			("n-sphere,n", po::value<unsigned>(&n_spheres), "Number of generated spheres (default: 15)")
+			("intensity,i", po::value<double>(&intensity), "Intensity of the light (default: 1000)")
 			;
 		
 		po::options_description opt_descr("General options");
@@ -106,13 +118,16 @@ int main(int argc, char *argv[]) {
 		object_prob /= s;
 		
 		camera = Vector(0,0,size_z/2);
-		scene.setLight(Light(Vector(0, size_y/4, size_z/2), 1000));
-		
+		scene.setLight(Light(Vector(0, size_y/4, size_z/2), intensity));
+
+		// Add walls
+		scene.addSphere(new Sphere(Vector(0,0,1000+3*size_z/4), 1000+size_z/4, Materials::neutral));
 		scene.addSphere(new Sphere(Vector(0,0,-1000-size_z/2), 1000, Materials::green));
 		scene.addSphere(new Sphere(Vector(0,1000+size_y/2, 0), 1000, Materials::red));
 		scene.addSphere(new Sphere(Vector(0,-1000-size_y/2,0), 1000, Materials::blue));
 		scene.addSphere(new Sphere(Vector(1000+size_x/2,0,0), 1000, Materials::magenta));
 		scene.addSphere(new Sphere(Vector(-1000-size_x/2,0,0), 1000, Materials::cyan));
+		
 		
 		unsigned spheres_created = 0;
 		while (spheres_created < n_spheres) {
@@ -152,7 +167,7 @@ int main(int argc, char *argv[]) {
 	/* Loading the scene */
 	std::ifstream scene_spec;
 	scene_spec.open(scene_file);
-	double x, y, z, intensity, radius, r, g, b;
+	double x, y, z, radius, r, g, b;
 	std::string material;
 	std::string line;
 	unsigned n_line = 0;
@@ -203,6 +218,7 @@ int main(int argc, char *argv[]) {
 	}
 	
 	/* Rendering for all pixel */
+	std::cerr << "### Treating scene file " << scene_file << " ###";
 	boost::progress_display progress((unsigned long) height+1, std::cerr);
 	++progress;
     #pragma omp parallel for schedule(dynamic,1)

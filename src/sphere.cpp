@@ -2,7 +2,7 @@
 #include "sphere.hpp"
 
 bool Sphere::compareByRadius(const std::unique_ptr<Sphere> &s1, const std::unique_ptr<Sphere> &s2) {
-	return (s1->radius >= s2->radius);
+	return (s1->radius > s2->radius);
 }
 
 Sphere::Intersection Sphere::intersect(const Ray &ray) const {
@@ -29,10 +29,6 @@ Vector Sphere::color(Vector P) const {
 }
 
 Vector MultiColorSphere::color(Vector P) const {
-	//return Vector(abs(radius - P.x) / radius
-	//			  ,abs(radius - P.y) / radius
-	//			  ,abs(radius - P.z) / radius
-	//			 );
 	double r=0,g=0,b=0;
 	if (origin.x - P.x > 0.)
 		r = 1;

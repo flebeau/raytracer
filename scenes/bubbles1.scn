@@ -1,7 +1,8 @@
-# One impossible sphere
 C 0 0 55
 L -10 20 40 3000
-S 0 0 20 10 impossible
+S 0 1 17 2 glass
+S 0 -1 13 2 glass
+S 0 -3 17 2 glass
 # Walls
 S 0 1000 0 940 red
 S 0 0 1000 940 neutral

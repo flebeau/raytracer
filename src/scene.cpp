@@ -119,13 +119,14 @@ Vector Scene::getColor(const Ray &ray, int n, bool fresnel) const {
 		Vector P = ray.origin + t * ray.direction;
 		Vector inc = (P - ray.origin).normalize();
 		Vector nor = (P - sphere.origin).normalize();
-		Vector P1 = P + eps * nor;		
+		Vector P1 = P + eps * nor;
+		Vector P2 = P - eps * nor;
 		
 		double specularity = sphere.material.specularity;
 		double refraction = sphere.material.refraction;
 		
 		// Compute Fresnel coefficients
-		if (fresnel && (sphere_inclusion[inter.sphere] == inter.sphere || sphere.material.refr_index != spheres[sphere_inclusion[inter.sphere]]->material.refr_index) && sphere.material.refraction > 0. && sphere.material.specularity < 0.) {
+		if (fresnel && (sphere_inclusion[inter.sphere] == inter.sphere || sphere.material.refr_index != spheres[sphere_inclusion[inter.sphere]]->material.refr_index) && sphere.material.refraction > 0 && sphere.material.specularity <= 0.) {
 			double n_inc, n_out;
 			Vector nor_refl = nor;
 			if (inter.entrance) {
@@ -176,14 +177,14 @@ Vector Scene::getColor(const Ray &ray, int n, bool fresnel) const {
 			Vector nor_refl = nor;
 			
 			if (inter.entrance) {
-				r.origin = P - eps * nor;
+				r.origin = P2;
 				n_inc = 1.;
 				if (sphere_inclusion[inter.sphere] != inter.sphere)
 					n_inc = spheres[sphere_inclusion[inter.sphere]]->material.refr_index;
 				n_out = sphere.material.refr_index;
 			} 
 			else {
-				r.origin = P + eps * nor;
+				r.origin = P1;
 				n_inc = sphere.material.refr_index;
 				n_out = 1.;
 				if (sphere_inclusion[inter.sphere] != inter.sphere)
@@ -201,7 +202,10 @@ Vector Scene::getColor(const Ray &ray, int n, bool fresnel) const {
 					res = res + color;
 			}
 			else {
-				r.origin = P1;
+				if (inter.entrance)
+					r.origin = P1;
+				else
+					r.origin = P2;
 				r.direction = (inc - 2 * inc.sp(nor) * nor).normalize();
 				res = getColor(r, n-1, fresnel);
 				res = refraction * res * sphere.material.refr_color;
