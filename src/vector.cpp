@@ -3,6 +3,7 @@
 #include <math.h>
 #include <random>
 
+/* Random generators */
 std::random_device rd;
 std::mt19937 mt(rd());
 std::uniform_real_distribution<double> unif(0.,1.);
@@ -63,7 +64,6 @@ Vector generateUniformRandomVector() {
 	double r1 = unif(mt);
 	double r2 = unif(mt);
 	double t = sqrt(1-r2);
-	//std::cerr << cos(2*PI*r1)*t << "," << sin(2*PI*r1)*t << "\n";
 	
 	return Vector(cos(2*PI*r1)*t, sin(2*PI*r1)*t, sqrt(r2));
 }

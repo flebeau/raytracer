@@ -26,6 +26,7 @@ int main(int argc, char *argv[]) {
 	std::string scene_file;
 	std::string output_file = "";
 	bool fresnel = true;
+	bool antialiasing = false;
 	bool random_scene = false;
 	
     // Parameters for random scene generation
@@ -52,11 +53,11 @@ int main(int argc, char *argv[]) {
 			("scene-file,f", po::value<std::string>(&scene_file)->required(), "Input file containing the scene description (required)")
 			("output-file,o", po::value<std::string>(&output_file), "Output image file (if none, output in window)")
 			("no-fresnel", "Disable use of Fresnel coefficients")
+			("antialiasing", "Enable antialiasing")
 			;
 		
 		po::options_description opt_random_scene("Options for random scene generation");
 		opt_random_scene.add_options()
-			("output_file,o", po::value<std::string>(&output_file), "Output scene file")
 			("size-x,x", po::value<double>(&size_x), "Size of the domain in x coordinate (default: 80)")
 			("size-y,y", po::value<double>(&size_y), "Size of the domain in y coordinate (default: 80)")
 			("size-z,z", po::value<double>(&size_z), "Size of the domain in z coordinate (default: 80)")
@@ -74,13 +75,16 @@ int main(int argc, char *argv[]) {
 		
 		po::variables_map vm;
 		po::store(po::command_line_parser(argc, argv).options(opt_descr).allow_unregistered().run(), vm);
+		
+		// If random scene generation is selected, only consider options for random generation
 		if (vm.count("random-scene")) {
 			random_scene = true;
 			opt_descr.add(opt_random_scene);
 		}
-		else
+		else // Otherwise consider options for the raytracer
 			opt_descr.add(opt_raytracer);
 		
+		// Print help message if option --help
 		if (vm.count("help")) {
 			std::cerr << opt_descr << "\n";
 			return EXIT_SUCCESS;
@@ -91,6 +95,8 @@ int main(int argc, char *argv[]) {
 		
 		if (vm.count("no-fresnel"))
 			fresnel = false;
+		if (vm.count("antialiasing"))
+			antialiasing = true;
 		
 		po::notify(vm);		
 	}
@@ -111,26 +117,32 @@ int main(int argc, char *argv[]) {
 	
 	/* Random scene generation */
 	if (random_scene) {
-		// Normalize given probabilities so that the sum is 1
+		// Normalize given proportions so that the sum is 1
 		double s = mirror_prob + transparent_prob + object_prob; 
 		mirror_prob /= s;
 		transparent_prob /= s;
 		object_prob /= s;
 		
+		// Set the camera and light
 		camera = Vector(0,0,size_z/2);
 		scene.setLight(Light(Vector(0, size_y/4, size_z/2), intensity));
 
 		// Add walls
-		scene.addSphere(new Sphere(Vector(0,0,1000+3*size_z/4), 1000+size_z/4, Materials::neutral));
+		scene.addSphere(new Sphere(Vector(0,0,1000+3*size_z/4), 1000, Materials::neutral));
 		scene.addSphere(new Sphere(Vector(0,0,-1000-size_z/2), 1000, Materials::green));
 		scene.addSphere(new Sphere(Vector(0,1000+size_y/2, 0), 1000, Materials::red));
 		scene.addSphere(new Sphere(Vector(0,-1000-size_y/2,0), 1000, Materials::blue));
 		scene.addSphere(new Sphere(Vector(1000+size_x/2,0,0), 1000, Materials::magenta));
 		scene.addSphere(new Sphere(Vector(-1000-size_x/2,0,0), 1000, Materials::cyan));
 		
-		
+		// Now generate spheres
 		unsigned spheres_created = 0;
+		unsigned failures = 0;
 		while (spheres_created < n_spheres) {
+			if (failures > 100) {
+				ErrorMessage() << "Could not generate random scene: too many failures!";
+				exit(EXIT_FAILURE);
+			}
 			// First choose the origin randomly
 			Vector origin(getUniformNumber() * size_x - size_x/2
 						  ,getUniformNumber() * size_y - size_y/2
@@ -140,12 +152,16 @@ int main(int argc, char *argv[]) {
 											  , std::min(size_y/2 - abs(origin.y)
 														 ,size_z/2 - abs(origin.z))));
 			double m = scene.MaxRadiusNewSphere(origin);
-			if (m == -1) // If the point is included in a non-transparent sphere, skip
+			if (m == -1) { // If the point is included in a non-transparent sphere, skip
+				++failures;
 				continue;
+			}
 			r_max = std::min(r_max, m);
 			// If the max radius is less than the min radius, the origin is invalid
-			if (r_max < radius_min)
+			if (r_max < radius_min) {
+				++failures;
 				continue;
+			}
 			// Else we can create the sphere, by choosing the material at random
 			double radius = getUniformNumber() * (r_max - radius_min) + radius_min;
 			double t = getUniformNumber();
@@ -156,10 +172,10 @@ int main(int argc, char *argv[]) {
 			else
 				scene.addSphere(new Sphere(origin, radius, Material(getUniformNumber(), getUniformNumber(), getUniformNumber())));
 			++spheres_created;
+			failures = 0;
 		}
 		
-		if (output_file == "")
-			std::cout << scene.toString(camera, "Random scene");
+		std::cout << scene.toString(camera, "Random scene");
 		
 		return EXIT_SUCCESS;
 	}
@@ -171,11 +187,12 @@ int main(int argc, char *argv[]) {
 	std::string material;
 	std::string line;
 	unsigned n_line = 0;
+	// We read the file line by line
 	while (getline(scene_spec, line)) {
 		++n_line;
-		if (line[0] == '#')
+		if (line[0] == '#') // Skip commentary lines
 			continue;
-		if (line[0] == 'L') {
+		if (line[0] == 'L') { // Handle light specification
 			std::stringstream s(line.substr(1));
 			if (!(s >> x >> y >> z >> intensity)) {
 				ErrorMessage() << "parsing error at line " << n_line << " of file " << scene_file;
@@ -185,7 +202,7 @@ int main(int argc, char *argv[]) {
 			scene.setLight(Light(light, intensity));
 			continue;
 		}
-		if (line[0] == 'C') {
+		if (line[0] == 'C') { // Handle camera specification
 			std::stringstream s(line.substr(1));
 			if (!(s >> x >> y >> z)) {
 				ErrorMessage() << "parsing error at line " << n_line << " of file " << scene_file;
@@ -194,14 +211,14 @@ int main(int argc, char *argv[]) {
 			camera = Vector(x, y, z);
 			continue;
 		}
-		if (line[0] == 'S') {
+		if (line[0] == 'S') { // Handle sphere specification
 			std::stringstream s(line.substr(1));
 			material = "";
 			s >> x >> y >> z >> radius >> material;
 			if (material == "multicolor") {
 				scene.addSphere(new MultiColorSphere(Vector(x,y,z),radius));
 			}
-			else if (material == "object") {
+			else if (material == "object") { // Can specify the color of an object
 				s >> r >> g >> b;
 				scene.addSphere(new Sphere(Vector(x,y,z),radius,Material(r,g,b)));
 			}
@@ -212,6 +229,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	
+	// First precompute sphere inclusions and check that spheres are either contained in another or disjoint from another one
 	if (!scene.precomputeSphereInclusion()) {
 		ErrorMessage() << "invalid scene! At least two spheres intersect without one being strictly included into the other.";
 		return EXIT_FAILURE;
@@ -219,19 +237,31 @@ int main(int argc, char *argv[]) {
 	
 	/* Rendering for all pixel */
 	std::cerr << "### Treating scene file " << scene_file << " ###";
-	boost::progress_display progress((unsigned long) height+1, std::cerr);
+	boost::progress_display progress((unsigned long) height+1, std::cerr); // Progress bar
 	++progress;
     #pragma omp parallel for schedule(dynamic,1)
 	for (int i = 0; i<height; i++) {
 		for (int j = 0; j<width; j++) {
-			Ray ray(camera,Vector(j+0.5-width/2, i+0.5-height/2,-height/(2*tan(fov/2))).normalize()); // Computing ray for pixel (i,j)
-			
+			Ray ray;
+			// Computing ray for pixel (i,j) with or without antialiasing
+			if (!antialiasing)
+				ray = Ray(camera,Vector(j+0.5-width/2, i+0.5-height/2,-height/(2*tan(fov/2))).normalize()); 
+			else {
+				double x = getUniformNumber(); 
+				double y = getUniformNumber();
+				double R = sqrt(-2*log(x));
+				double u = R * cos(2 * PI * y) * 0.5;
+				double v = R * sin(2 * PI * y) * 0.5;
+				ray = Ray(camera, Vector(j+u-width/2-0.5, i+v-height/2-0.5,-height/(2*tan(fov/2))).normalize());
+			}
+			// Simulate with n_retry rays and do the mean
 			Vector color = Vector(0, 0, 0);
 			for (int n = 0; n<n_retry; n++) {
 				color = color + scene.getColor(ray, n_bounces, fresnel);
 			}
 			color = (1. / ((double)n_retry)) * color;
 			
+			// Write the result in the image, applying gamma correction and ensuring that the output color is between 0 and 255
 			img[((height-i-1)*width+j)] = std::min(255, (int) (255. * pow(color.x,1./gamma)));
 			img[((height-i-1)*width+j) + height*width] = std::min(255, (int) (255. * pow(color.y,1./gamma)));
 			img[((height-i-1)*width+j) + 2*height*width] = std::min(255, (int) (255. * pow(color.z,1./gamma)));
@@ -239,13 +269,14 @@ int main(int argc, char *argv[]) {
 		++progress;
 	}
 	
+	// Output in a file or display generated image
 	cimg_library::CImg<unsigned char> cimg(&img[0], width, height, 1, 3);
 	if (output_file != "")
 		cimg.save(output_file.c_str());
 	else
 		cimg.display();
 	
-	
+	// Free memory and return
 	free(img);
 	return 0;
 }

@@ -14,13 +14,13 @@ public:
 		: color(r,g,b), diffusion_coeff(d), specularity(s), spec_color(sr,sg,sb)
 		, refraction(re), refr_color(rer, reg, reb), refr_index(ind){}
 	
-	Vector color;
-	double diffusion_coeff;
-	double specularity;
-	Vector spec_color;
+	Vector color; // Color of the object
+	double diffusion_coeff; // Intensity of light diffusion of the material
+	double specularity; // Probability that a ray is reflected
+	Vector spec_color; // Color of specularity
 	double refraction; // specularity+refraction should be <= 1
-	Vector refr_color;
-	double refr_index;
+	Vector refr_color; // Color of refraction
+	double refr_index; // Refractive index of the material
 	
 	bool operator==(const Material &mat) const {
 		return (mat.color == color && mat.diffusion_coeff == diffusion_coeff
@@ -30,8 +30,7 @@ public:
 	}
 };
 
-/* Materials */
-
+/* Useful material examples */
 namespace Materials {
 	const Material neutral = Material();
 	const Material blue = Material(0,0,1);

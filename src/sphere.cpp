@@ -28,6 +28,7 @@ Vector Sphere::color(Vector P) const {
 	return material.color;
 }
 
+// An example of coordinate-dependent sphere color
 Vector MultiColorSphere::color(Vector P) const {
 	double r=0,g=0,b=0;
 	if (origin.x - P.x > 0.)

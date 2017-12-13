@@ -21,7 +21,7 @@ public:
 	// Returns 0 if no intersection and t such that C + t.V is the intersection otherwise.
 	// If t > 0 then returns also true if the ray is entering the sphere
 	Intersection intersect(const Ray &ray) const;
-	
+
 	virtual Vector color(Vector P) const; // Return the color of a point on the sphere, by default the color of the material
 	
 	Vector origin;
@@ -29,6 +29,7 @@ public:
 	Material material;
 };
 
+// Example of other type of sphere for which the color is not uniform on the sphere
 class MultiColorSphere : public Sphere {
 public:
 	MultiColorSphere(Vector o, double r) : Sphere(o, r) {}
