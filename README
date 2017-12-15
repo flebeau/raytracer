@@ -30,3 +30,8 @@ The raytracer takes as input a scene file containing all the info about the scen
   - spheres: a line of the form "S <x> <y> <z> <radius> <material>" specifies the position, radius and material of a sphere. Th <material> argument can be:
      * one of the predefined materials (see file src/material.hpp, namespace Materials)
 	 * of the form "object <r> <g> <b>" where r,g and b are float numbers between 0 and 1 representing the color of the sphere.
+
+### Scripts ###
+Two scripts are provided with this code (you must first compile the program before using them):
+  - generate_images.sh: generates all the images used in the report. I recommend to lower the resolution (to 500x500 or even 400x400) if you just want to test the program, otherwise the computation times are too big
+  - random_scenes.sh: takes as input an integer and generates as many random scenes, with a fast rendering with the raytracer.
