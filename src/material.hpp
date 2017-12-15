@@ -42,6 +42,7 @@ namespace Materials {
 	const Material mirror = Material(0,0,0,0.,1.);
 	const Material yellow_mirror = Material(1,1,0,0.,0.5,1,1,0);
 	const Material transparent = Material(1,1,1,0.,0.,1,1,1,1.,1,1,1,1.);
+	const Material crazy = Material(0,0,1,1./3.,1./3.,1,0,0,1./3.,0,1,0,1.5);
 	const Material impossible = Material(1,1,1,0.,0.,1,1,1,1.,1,1,1,0.7);
 	const Material glass = Material(1,1,1,0.,0.,1,1,1,1.,1,1,1,1.5);
 	const Material light_glass = Material(1,1,1,0.,0.,1,1,1,1.,1,1,1,1.2);
@@ -59,6 +60,7 @@ namespace Materials {
 		{"mirror", mirror},
 		{"yellow_mirror", yellow_mirror},
 		{"transparent", transparent},
+		{"crazy", crazy},
 		{"glass", glass},
 		{"impossible", impossible},
 		{"light_glass", light_glass}

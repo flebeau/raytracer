@@ -26,7 +26,9 @@ int main(int argc, char *argv[]) {
 	std::string scene_file;
 	std::string output_file = "";
 	bool fresnel = true;
-	bool antialiasing = false;
+	bool antialiasing = true;
+	bool diffuse = true;
+	bool deterministic = false;
 	bool random_scene = false;
 	
     // Parameters for random scene generation
@@ -53,7 +55,9 @@ int main(int argc, char *argv[]) {
 			("scene-file,f", po::value<std::string>(&scene_file)->required(), "Input file containing the scene description (required)")
 			("output-file,o", po::value<std::string>(&output_file), "Output image file (if none, output in window)")
 			("no-fresnel", "Disable use of Fresnel coefficients")
-			("antialiasing", "Enable antialiasing")
+			("no-antialiasing", "Disable antialiasing")
+			("no-diffuse", "Disable diffusion")
+			("deterministic", "Disable random choice between bouncing and refraction")
 			;
 		
 		po::options_description opt_random_scene("Options for random scene generation");
@@ -95,8 +99,12 @@ int main(int argc, char *argv[]) {
 		
 		if (vm.count("no-fresnel"))
 			fresnel = false;
-		if (vm.count("antialiasing"))
-			antialiasing = true;
+		if (vm.count("no-antialiasing"))
+			antialiasing = false;
+		if (vm.count("no-diffuse"))
+			diffuse = false;
+		if (vm.count("deterministic"))
+			deterministic = true;
 		
 		po::notify(vm);		
 	}
@@ -229,9 +237,9 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	
-	// First precompute sphere inclusions and check that spheres are either contained in another or disjoint from another one
+	// First precompute sphere inclusions and check that transparent spheres are either contained in another or disjoint from another one
 	if (!scene.precomputeSphereInclusion()) {
-		ErrorMessage() << "invalid scene! At least two spheres intersect without one being strictly included into the other.";
+		ErrorMessage() << "invalid scene! At least two transparent spheres intersect without one being strictly included into the other.";
 		return EXIT_FAILURE;
 	}
 	
@@ -246,18 +254,18 @@ int main(int argc, char *argv[]) {
 			// Computing ray for pixel (i,j) with or without antialiasing
 			if (!antialiasing)
 				ray = Ray(camera,Vector(j+0.5-width/2, i+0.5-height/2,-height/(2*tan(fov/2))).normalize()); 
-			else {
-				double x = getUniformNumber(); 
-				double y = getUniformNumber();
-				double R = sqrt(-2*log(x));
-				double u = R * cos(2 * PI * y) * 0.5;
-				double v = R * sin(2 * PI * y) * 0.5;
-				ray = Ray(camera, Vector(j+u-width/2-0.5, i+v-height/2-0.5,-height/(2*tan(fov/2))).normalize());
-			}
 			// Simulate with n_retry rays and do the mean
 			Vector color = Vector(0, 0, 0);
 			for (int n = 0; n<n_retry; n++) {
-				color = color + scene.getColor(ray, n_bounces, fresnel);
+				if (antialiasing) {
+						double x = getUniformNumber(); 
+						double y = getUniformNumber();
+						double R = sqrt(-2*log(x));
+						double u = R * cos(2 * PI * y) * 0.5;
+						double v = R * sin(2 * PI * y) * 0.5;
+						ray = Ray(camera, Vector(j+u-width/2-0.5, i+v-height/2-0.5,-height/(2*tan(fov/2))).normalize());		
+				}
+				color = color + scene.getColor(ray, n_bounces, fresnel, diffuse, deterministic);
 			}
 			color = (1. / ((double)n_retry)) * color;
 			
@@ -271,8 +279,10 @@ int main(int argc, char *argv[]) {
 	
 	// Output in a file or display generated image
 	cimg_library::CImg<unsigned char> cimg(&img[0], width, height, 1, 3);
-	if (output_file != "")
+	if (output_file != "") {
 		cimg.save(output_file.c_str());
+		std::cerr << "Wrote output in file " << output_file << "\n";
+	}
 	else
 		cimg.display();
 	

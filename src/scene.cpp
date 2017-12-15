@@ -103,7 +103,7 @@ Scene::Intersection Scene::intersect(const Ray &ray) const {
 	return inter;
 }
 
-Vector Scene::getColor(const Ray &ray, int n, bool fresnel) const {
+Vector Scene::getColor(const Ray &ray, int n, bool fresnel, bool diffuse, bool deterministic) const {
 	Vector res(0,0,0);
 	double eps = 0.001; // Use to avoid noise
 	Scene::Intersection inter = intersect(ray); // Retrieve closest intersection between spheres and input ray
@@ -158,7 +158,7 @@ Vector Scene::getColor(const Ray &ray, int n, bool fresnel) const {
 		}
 		
 		// If need to bounce and to do refraction, choose only one randomly (according to the coefficients)
-		if (refraction > 0 && specularity > 0) {
+		if (!deterministic && refraction > 0 && specularity > 0) {
 			if (getUniformNumber() < refraction) {
 				specularity = 0.;
 				refraction = 1.;
@@ -174,7 +174,7 @@ Vector Scene::getColor(const Ray &ray, int n, bool fresnel) const {
 			Ray r;
 			r.origin = P1;
 			r.direction = (inc - 2 * inc.sp(nor) * nor).normalize();
-			res = getColor(r, n-1, fresnel); // Compute recursively the color
+			res = getColor(r, n-1, fresnel, diffuse); // Compute recursively the color
 			res = specularity * res * sphere.material.spec_color; // Multiply by the specularity color
 		}
 		
@@ -206,7 +206,7 @@ Vector Scene::getColor(const Ray &ray, int n, bool fresnel) const {
 			double norm_coeff = 1 - pow(n_inc/n_out,2) * (1 - pow(inc.sp(nor_refl),2));
 			if (norm_coeff >= 0) {  // only reflexion in fact if the coeff is negative
 				r.direction = ((n_inc / n_out) * inc - ((n_inc / n_out) * inc.sp(nor_refl) + sqrt(norm_coeff)) * nor_refl).normalize(); // Direction of refracted ray
-				Vector color = getColor(r, n-1, fresnel); // Compute the color recursively
+				Vector color = getColor(r, n-1, fresnel, diffuse); // Compute the color recursively
 				if (inter.entrance) // Apply the multiplicative coeffs only once (at the entrance of the sphere)
 					res = res + refraction * color * sphere.material.refr_color;
 				else
@@ -218,7 +218,7 @@ Vector Scene::getColor(const Ray &ray, int n, bool fresnel) const {
 				else
 					r.origin = P2;
 				r.direction = (inc - 2 * inc.sp(nor) * nor).normalize();
-				res = getColor(r, n-1, fresnel);
+				res = getColor(r, n-1, fresnel, diffuse);
 				res = refraction * res * sphere.material.refr_color;
 			}
 		}
@@ -235,7 +235,7 @@ Vector Scene::getColor(const Ray &ray, int n, bool fresnel) const {
 			}
 			
 			// Now compute indirect lightning
-			if (n > 0) {
+			if (diffuse && n > 0) {
 				Ray r;
 				r.origin = P1;
 				r.direction = generateUniformRandomVector(); // Get random direction
@@ -244,7 +244,7 @@ Vector Scene::getColor(const Ray &ray, int n, bool fresnel) const {
 				Vector w = nor.vp(v);
 				r.direction.convertCoordinateSystem(v, w, nor); // Convert to canonical coordinates
 				r.direction = r.direction.normalize();
-				res = res + (1./PI) * sphere.material.diffusion_coeff * sphere.color(P) * getColor(r, n-1, fresnel); // Compute recursively the color and take diffusion into account
+				res = res + (1./PI) * sphere.material.diffusion_coeff * sphere.color(P) * getColor(r, n-1, fresnel, diffuse); // Compute recursively the color and take diffusion into account
 			}
 		}
 	}

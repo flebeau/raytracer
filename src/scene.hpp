@@ -54,7 +54,7 @@ public:
 	
 	// Main function of the raytracer: returns the color of the input ray simulated in the scene with
 	// recursion depth n. The use of Fresnel coefficients can be toggled off.
-	Vector getColor(const Ray &r, int n, bool fresnel = true) const;
+	Vector getColor(const Ray &r, int n, bool fresnel = true, bool diffuse = true, bool deterministic = false) const;
 	
 private:
 	std::vector<std::unique_ptr<Sphere> > spheres;

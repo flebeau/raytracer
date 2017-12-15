@@ -1,0 +1,32 @@
+#######################
+#      Raytracer      #
+#  by Fabrice Lebeau  #
+#######################
+
+### Prerequisite ###
+  - C++ compiler with C++11 standard
+  - CMake >= 3.1
+  - Boost
+  - OpenMP
+  - Threads
+
+### Compilation ###
+In order to compile the program, execute the following commands:
+  mkdir -p build
+  cd build
+  cmake ..
+  make
+
+### Usage ###
+There are two parts in the program: the random scene generator and the raytracer itself. See the help commands:
+  - raytracer -h (for the raytracer)
+  - raytracer -R -h (for the scene generator)
+
+### Scene file specification ###
+The raytracer takes as input a scene file containing all the info about the scene. The format is as follows:
+  - comments: line starting with # are ignored
+  - camera: a line of the form "C <x> <y> <z>" (x, y and z are float numbers) is required, specifying the position of the camera (the camera always point to the negative z coordinate)
+  - light: a line of the form "L <x> <y> <z> <intensity>" (x, y, z and i are float numbers) is required, specifying the position and intensity of the light
+  - spheres: a line of the form "S <x> <y> <z> <radius> <material>" specifies the position, radius and material of a sphere. Th <material> argument can be:
+     * one of the predefined materials (see file src/material.hpp, namespace Materials)
+	 * of the form "object <r> <g> <b>" where r,g and b are float numbers between 0 and 1 representing the color of the sphere.
